@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:effecient/Auth/loginPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,24 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Profile'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+            );
+          },
+          child: Icon(Icons.logout),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+        body: Scaffold(
+          body: Text('hello '),
+        ));
   }
 
   Future<String?> getUsernameByEmail(String email) async {

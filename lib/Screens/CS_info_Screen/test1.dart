@@ -1,17 +1,25 @@
+// ignore_for_file: prefer_final_fields, library_private_types_in_public_api, unused_import, depend_on_referenced_packages
+
 import 'dart:convert';
 // import 'dart:ffi';
 import 'dart:async';
+import 'dart:html';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:effecient/Providers/chData.dart';
+
 import 'package:effecient/Screens/CS_info_Screen/functions.dart';
 import 'package:effecient/Screens/CS_info_Screen/mapScreen.dart';
 import 'package:effecient/Screens/CS_info_Screen/test2.dart';
+import 'package:provider/provider.dart';
 import 'package:random_uuid_string/random_uuid_string.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_material_pickers/flutter_material_pickers.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class Test1 extends StatefulWidget {
   const Test1({Key? key}) : super(key: key);
@@ -24,26 +32,24 @@ class _Test1State extends State<Test1> {
   Location _location = Location();
   bool loading = true;
   int length = 20;
-  Map<dynamic, dynamic> aLLCS = {};
+  Map<String, dynamic> aLLCS = {};
   LocationData? currentLocation;
+  String selectedOption = '';
+  String userInput = '';
 
   DatabaseReference ref = FirebaseDatabase.instance.ref("Locations");
+  // late StreamSubscription<Event> _dataSubscription;
+  late Timer _timer;
 
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       // Check the value and update state
       if (length == 0) {
-        print(currentLocation);
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //       builder: (context) => Test2(
-        //           chargingStations: aLLCS, currentLocation: currentLocation)),
-        // );
         setState(() {
           loading = false;
+          Provider.of<chDataProvider>(context, listen: false).loading = false;
           length = 1;
         });
       }
@@ -51,10 +57,18 @@ class _Test1State extends State<Test1> {
     readData();
   }
 
+  @override
+  void dispose() {
+    _timer.cancel();
+    // _dataSubscription.cancel(); // Cancel the subscription
+    super.dispose();
+  }
+
   Future<void> readData() async {
     try {
       // Fetch current location
       LocationData CL = await _location.getLocation();
+
       setState(() {
         currentLocation = CL;
       });
@@ -66,17 +80,17 @@ class _Test1State extends State<Test1> {
 
         if (snapshot.value != null) {
           Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
-          print('fetched data is = ');
-          print(data);
+          // print('fetched data is = THIS NEW ONE  ');
+          // print(data);
           if (data == null) {
             print('No data TRANSFERED ');
           }
 
           if (data != null) {
             length = data.length;
-            print(length);
+            // print(length);
             data.forEach((key, value) async {
-              Map<dynamic, dynamic> chargingStation = {
+              Map<String, dynamic> chargingStation = {
                 'available_slots': 2,
                 'cost': 2.83,
                 'distance': 5.5,
@@ -102,15 +116,18 @@ class _Test1State extends State<Test1> {
               await sendFun(cLat, cLong, lati, long).then((value1) => {
                     chargingStation['distance'] = value1['distanceText'],
                     chargingStation['duration'] = value1['durationText'],
-
                     setState(() {
                       aLLCS[key] = chargingStation;
                       length = length - 1;
-                      print(length);
+                      // print(length);
                     }),
                     // print(chargingStation),
                   });
             });
+            print(aLLCS);
+            Provider.of<chDataProvider>(context, listen: false)
+                .chargingStations = aLLCS;
+            // print('This is Provoder on');
           }
         } else {}
       });
@@ -124,13 +141,11 @@ class _Test1State extends State<Test1> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-          child: loading
-              ? CircularProgressIndicator()
-              : Test2(
-                  chargingStations: aLLCS, currentLocation: currentLocation)),
+          child: loading ? const CircularProgressIndicator() : const Test2()),
     );
-    // body: Center(child: CircularProgressIndicator()));
   }
+
+  // Drop Down Method
 
   // Navigation function
   void Navigate() {
@@ -143,6 +158,11 @@ class _Test1State extends State<Test1> {
 
   // send Func
   sendFun(double? clat, double? clong, double dlat, double dlong) async {
+    // This is Final one
+    // String url2 = 'https://server-orcin-eight.vercel.app/api/distanceandtime';
+    // print(url2);
+
+    // Just for Checking
     String url2 = 'http://127.0.0.1:5000/api/distanceandtime';
 
     try {

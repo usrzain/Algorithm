@@ -14,7 +14,7 @@ import 'package:effecient/Auth/SignupPage.dart';
 //import 'package:effecient/Auth/loginPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:flutter/material.dart';
-//import 'tab_contents.dart';
+// import 'tab_contents.dart';
 //import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -57,6 +57,8 @@ class _HomePageState extends State<HomePage>
           if (_tabController.index == 0) Tab1Content(),
           if (_tabController.index == 1) Tab2Content(),
           if (_tabController.index == 2) Tab3Content(),
+          if (_tabController.index == 3) Tab4Content(user: widget.user),
+          if (_tabController.index == 4) Tab5Content(user: widget.user),
           Positioned(
             left: 0,
             right: 0,
@@ -65,17 +67,17 @@ class _HomePageState extends State<HomePage>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await FirebaseAuth.instance.signOut();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        },
-        child: Icon(Icons.arrow_forward),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     await FirebaseAuth.instance.signOut();
+      //     Navigator.pushReplacement(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => const LoginPage()),
+      //     );
+      //   },
+      //   child: Icon(Icons.arrow_forward),
+      // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
     );
   }
 

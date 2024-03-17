@@ -14,8 +14,9 @@ dependencies:
     sdk: flutter
   
 
-
- 
+  provider: ^6.1.1
+  flutter_material_pickers: ^3.6.0
+  dropdown_button2: ^2.3.9
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.5.3 # Check for the latest version
   location: ^5.0.3

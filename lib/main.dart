@@ -1,12 +1,16 @@
 import 'package:effecient/Auth/HomePage.dart';
 import 'package:effecient/Auth/loginPage.dart';
 import 'package:effecient/Data.dart';
+import 'package:effecient/Providers/chData.dart';
+import 'package:effecient/Providers/loading.dart';
+
 import 'package:effecient/Screens/Extra_Screens/tabCheck.dart';
 import 'package:effecient/WelcomePage.dart';
 import 'package:effecient/tab_contents.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
 import 'package:effecient/Screens/CarSelection/carSelection.dart';
@@ -24,7 +28,12 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   //MAIN
-  runApp(MyApp(initialScreen: LoginPage()));
+  runApp(ChangeNotifierProvider(
+    // Create an instance of YourDataProvider
+    create: (context) => chDataProvider(),
+
+    child: const MyApp(initialScreen: LoginPage()), // Your app's main widget
+  ));
   // Preview the WelcomePage directly
   // runApp(MyApp(initialScreen: HomePage()));
 
