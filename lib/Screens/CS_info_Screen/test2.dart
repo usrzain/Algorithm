@@ -79,12 +79,13 @@ class _Test2State extends State<Test2> {
           Visibility.maintain(
               child: FloatingActionButton(
             onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return openFilterModal(context);
-                },
-              );
+              // showModalBottomSheet(
+              //   context: context,
+              //   builder: (BuildContext context) {
+              //     // return openFilterModal(context, 0.0, 0.0);
+              //     return null;
+              //   },
+              // );
             },
             tooltip: 'Filter',
             child: const Icon(Icons.filter_list),
@@ -612,126 +613,4 @@ class _Test2State extends State<Test2> {
       ),
     );
   }
-}
-
-Widget openFilterModal(BuildContext context) {
-  String userInput = '';
-  String selectedTitle = '';
-  String selectedSecondTitle = '';
-
-  return StatefulBuilder(
-    builder: (BuildContext context, StateSetter setState) {
-      return SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Enter Input:',
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                onChanged: (value) {
-                  setState(() {
-                    userInput = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter input here',
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Select Title:',
-                style: TextStyle(fontSize: 18),
-              ),
-              Wrap(
-                children: [
-                  // Generate chip tiles for titles
-                  ChoiceChip(
-                    label: Text('Title 1'),
-                    selected: selectedTitle == 'Title 1',
-                    onSelected: (isSelected) {
-                      setState(() {
-                        selectedTitle = isSelected ? 'Title 1' : '';
-                      });
-                    },
-                  ),
-                  ChoiceChip(
-                    label: Text('Title 2'),
-                    selected: selectedTitle == 'Title 2',
-                    onSelected: (isSelected) {
-                      setState(() {
-                        selectedTitle = isSelected ? 'Title 2' : '';
-                      });
-                    },
-                  ),
-                  // Add more chip tiles as needed
-                ],
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Select Second Title:',
-                style: TextStyle(fontSize: 18),
-              ),
-              Wrap(
-                children: [
-                  // Generate chip tiles for second titles
-                  ChoiceChip(
-                    label: Text('Second Title 1'),
-                    selected: selectedSecondTitle == 'Second Title 1',
-                    onSelected: (isSelected) {
-                      setState(() {
-                        selectedSecondTitle =
-                            isSelected ? 'Second Title 1' : '';
-                      });
-                    },
-                  ),
-                  ChoiceChip(
-                    label: Text('Second Title 2'),
-                    selected: selectedSecondTitle == 'Second Title 2',
-                    onSelected: (isSelected) {
-                      setState(() {
-                        selectedSecondTitle =
-                            isSelected ? 'Second Title 2' : '';
-                      });
-                    },
-                  )
-                  // Add more chip tiles as needed
-                ],
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Making it false to show the loading.....
-                  // Provider.of<chDataProvider>(context, listen: false).loading2 =
-                  //     false;
-
-                  // Do something with userInput, selectedTitle, selectedSecondTitle
-                  Navigator.pop(context);
-                  print(userInput);
-                  print('---------');
-                  print(selectedTitle);
-                  print('---------');
-                  print(selectedSecondTitle);
-                  print('---------');
-
-// Update loading2 within the Future
-                  // fetchData();
-
-                  // waiting for 2 seconds
-                  // await Future.delayed(const Duration(seconds: 2));
-                  // again making loading to true to show the output
-                },
-                child: Text('Apply'),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
 }

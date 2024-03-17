@@ -1,6 +1,7 @@
 // lib/providers/your_data_provider.dart
 
 import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Charging Station class
 
@@ -42,10 +43,16 @@ class chDataProvider extends ChangeNotifier {
   // Data variable to store the fetched data
   bool _loading = false;
   bool _loading2 =
-      true; // this is for the rebuilding of Map and First building of Map
+      false; // this is for the rebuilding of Map and First building of Map
   bool _markerLoadingComplete = false;
   Map<String, dynamic> _chargingStations = {};
   bool _polyLineDone = false;
+  Set<Marker> _markers = {};
+  Set<Polyline> _pPoints = {};
+  int? _stateOfCharge;
+  String? _vehModel;
+  String? _vehVersion;
+  bool _showReset = false;
 
   // Getter to access the data
   bool get loading => _loading;
@@ -53,6 +60,12 @@ class chDataProvider extends ChangeNotifier {
   Map<String, dynamic> get chargingStations => _chargingStations;
   bool get markerLoadingComplete => _markerLoadingComplete;
   bool get polyLineDone => _polyLineDone;
+  Set<Marker> get markers => _markers;
+  Set<Polyline> get pPoints => _pPoints;
+  int? get stateOfCharge => _stateOfCharge;
+  String? get vehModel => _vehModel;
+  String? get vehVersion => _vehVersion;
+  bool get showReset => _showReset;
 
   int value = 1; // Initial value
 
@@ -89,5 +102,35 @@ class chDataProvider extends ChangeNotifier {
   set polyLineDone(bool value) {
     _polyLineDone = value;
     notifyListeners();
+  }
+
+  set markers(Set<Marker> value) {
+    _markers = value;
+    notifyListeners();
+  }
+
+  set pPoints(Set<Polyline> value) {
+    _pPoints = value;
+    notifyListeners();
+  }
+
+  set stateOfCharge(int? value) {
+    _stateOfCharge = value;
+    notifyListeners(); // Notify listeners that data has changed
+  }
+
+  set vehModel(String? value) {
+    _vehModel = value;
+    notifyListeners(); // Notify listeners that data has changed
+  }
+
+  set vehVersion(String? value) {
+    _vehVersion = value;
+    notifyListeners(); // Notify listeners that data has changed
+  }
+
+  set showReset(bool value) {
+    _showReset = value;
+    notifyListeners(); // Notify listeners that data has changed
   }
 }

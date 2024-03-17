@@ -2,7 +2,14 @@
 
 import 'dart:async';
 import 'dart:convert';
+
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:effecient/Screens/CS_info_Screen/extraFun.dart';
 import 'package:effecient/Screens/CS_info_Screen/polyLine_Response.dart';
+import 'package:effecient/Screens/CS_info_Screen/test2.dart';
+import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,6 +20,8 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:random_uuid_string/random_uuid_string.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 
 class Test3 extends StatefulWidget {
   const Test3({Key? key}) : super(key: key);
@@ -29,7 +38,7 @@ class _Test3State extends State<Test3> {
   LatLng _initialPosition = LatLng(24.8607, 67.0011);
   // for new polyline
   polyLine_Response plineResp = polyLine_Response();
-  String googleAPiKey = "AIzaSyBeG5g3Ps44SleGRirPm4IcnC9BvwbLqDI";
+  String googleAPiKey = "AIzaSyCtDSgmH1koRCq9tU3zqf4T5tzsISG3nNY";
   Set<Polyline> pPoints = {};
   // for new poly line
   bool loading = true;
@@ -43,10 +52,15 @@ class _Test3State extends State<Test3> {
   String address = '123,ABC City,XYZ Country';
   // late StreamSubscription<Event> _dataSubscription;
   late Timer _timer;
+  String? selectedValue;
+  bool locationPermission = false;
+  late final customIcon;
+  BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   // bool localpPoint = false;
 
   @override
   void initState() {
+    addCustomIcon();
     super.initState();
     _timer = Timer.periodic(Duration(milliseconds: 5), (timer) {
       // Check the value and update state
@@ -54,7 +68,7 @@ class _Test3State extends State<Test3> {
         setState(() {
           loading = false;
           _createMarkers(aLLCS);
-          print(_markers);
+
           Provider.of<chDataProvider>(context, listen: false).loading2 = false;
           Provider.of<chDataProvider>(context, listen: false)
               .markerLoadingComplete = true;
@@ -78,14 +92,39 @@ class _Test3State extends State<Test3> {
     super.dispose();
   }
 
+  // Creating Icon for markers
+
+  void addCustomIcon() {
+    BitmapDescriptor.fromAssetImage(
+            const ImageConfiguration(), "assets/Intro/charging-station.png")
+        .then(
+      (icon) {
+        setState(() {
+          markerIcon = icon;
+        });
+      },
+    );
+  }
+
+  //
+
   Future<void> readData() async {
     try {
+      // Making icon for marker
+      final customIcon2 =
+          await getCustomIcon('assets/Intro/charging-station.png');
+
       // Fetch current location
       LocationData CL = await _location.getLocation();
 
+      print('working ');
       setState(() {
         currentLocation = CL;
+        _initialPosition = LatLng(CL.latitude ?? 0.0, CL.longitude ?? 0.0);
+        customIcon = customIcon2;
       });
+      print(currentLocation.runtimeType);
+      print(_initialPosition.runtimeType);
 
       // Fetch data from the database
 
@@ -103,7 +142,6 @@ class _Test3State extends State<Test3> {
             length = data.length;
 
             data.forEach((key, value) async {
-              print('Working has been started');
               Map<String, dynamic> chargingStation = {
                 'available_slots': 2,
                 'cost': 2.83,
@@ -135,7 +173,6 @@ class _Test3State extends State<Test3> {
                       length = length - 1;
                       // print(length);
                     }),
-                    // print(chargingStation),
                   });
             });
           }
@@ -152,11 +189,11 @@ class _Test3State extends State<Test3> {
   // send Func
   sendFun(double? clat, double? clong, double dlat, double dlong) async {
     // This is Final one
-    // String url2 = 'https://server-orcin-eight.vercel.app/api/distanceandtime';
+    String url2 = 'https://server-orcin-eight.vercel.app/api/distanceandtime';
     // print(url2);
 
     // Just for Checking
-    String url2 = 'http://127.0.0.1:5000/api/distanceandtime';
+    // String url2 = 'http://127.0.0.1:5000/api/distanceandtime';
 
     try {
       String queryString = '';
@@ -188,17 +225,23 @@ class _Test3State extends State<Test3> {
 
   // Creating Markers
   void _createMarkers(CS) {
+    bool bToggle = true;
     setState(() {
       _markers.clear();
       _markers.add(
         Marker(
-            markerId: const MarkerId('current_location'),
-            position: LatLng(
-              currentLocation?.latitude ?? 0.0,
-              currentLocation?.longitude ?? 0.0,
-            ),
-            infoWindow: const InfoWindow(title: 'Your Location'),
-            icon: BitmapDescriptor.defaultMarker),
+          markerId: const MarkerId('current_location'),
+          position: LatLng(
+            currentLocation?.latitude ?? 0.0,
+            currentLocation?.longitude ?? 0.0,
+          ),
+          infoWindow: const InfoWindow(title: 'Your Location'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              // ignore: dead_code
+              (bToggle)
+                  ? BitmapDescriptor.hueYellow
+                  : BitmapDescriptor.hueAzure),
+        ),
       );
 
       for (var key in CS.keys) {
@@ -231,6 +274,7 @@ class _Test3State extends State<Test3> {
       Marker(
         markerId: MarkerId(RandomString.randomString(length: 10)),
         position: LatLng(lati, long),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         infoWindow: InfoWindow(title: title),
         onTap: () {
           showModalBottomSheet<void>(
@@ -482,7 +526,7 @@ class _Test3State extends State<Test3> {
                           Row(
                             children: [
                               Text(
-                                '" $slotsText', // Use the variable for the number of available slots
+                                ' $slotsText', // Use the variable for the number of available slots
 
                                 style: TextStyle(
                                   fontFamily: 'Raleway',
@@ -494,15 +538,6 @@ class _Test3State extends State<Test3> {
                               SizedBox(width: 5.0),
 
                               // Button indicating availability status
-
-                              Text(
-                                'out of 3 "', // Replace with the actual charger information
-
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.0,
-                                ),
-                              ),
                             ],
                           ),
                         ],
@@ -573,6 +608,8 @@ class _Test3State extends State<Test3> {
                             child: ElevatedButton(
                               onPressed: () {
                                 // Add functionality for the Navigate button
+                                MapsLauncher.launchCoordinates(
+                                    lati, long, 'Google Headquarters are here');
                               },
                               style: ButtonStyle(
                                 backgroundColor:
@@ -603,9 +640,6 @@ class _Test3State extends State<Test3> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Loading Example'),
-      ),
       body: Stack(
         children: [
           // Consumer widget displaying content based on loading2
@@ -625,12 +659,17 @@ class _Test3State extends State<Test3> {
                               onMapCreated: (GoogleMapController controller) {
                                 _mapController = controller;
                               },
-                              markers: _markers,
+                              markers: Provider.of<chDataProvider>(context,
+                                      listen: false)
+                                  .markers,
                               // setting polylines
-                              polylines: pPoints,
+                              polylines: Provider.of<chDataProvider>(context,
+                                      listen: false)
+                                  .pPoints,
                             )
-                          : const Text('Polyline Loading ')
-                      : const CircularProgressIndicator() // Show loading indicator
+                          : loadingWidget(context, 'Polylines')
+                      : loadingWidget(
+                          context, 'Markers') // Show loading indicator
                   : dataProvider.markerLoadingComplete
                       ? GoogleMap(
                           mapType: MapType.normal,
@@ -643,28 +682,199 @@ class _Test3State extends State<Test3> {
                           },
                           markers: _markers,
                         )
-                      : const CircularProgressIndicator();
+                      : loadingWidget(context, 'Markers');
               // Show loading indicator// Display message when loaded
             },
           ),
-          // Right-top positioned FloatingActionButton
+
           Positioned(
-            // Adjust top padding as needed
-            child: FloatingActionButton(
-              onPressed: () {
-                final dataProvider = context
-                    .read<chDataProvider>(); // Access provider using context
-                dataProvider.loading2 = !dataProvider.loading2;
-                // sending request for Best Charging Station
-                requestForBestCS(
-                    currentLocation?.latitude, currentLocation?.longitude, 25);
-                // Setting the polyline Flag to true
-              },
-              child: const Icon(Icons.refresh),
-            ),
-          ),
+              top: 16.0, // Adjust margin as needed
+              left: 16.0, // Adjust horizontal margin as needed
+              child: Consumer<chDataProvider>(
+                  builder: (context, dataProvider, child) {
+                return dataProvider.showReset
+                    ? FloatingActionButton(
+                        onPressed: () {
+                          setState(() {
+                            pPoints = {};
+                          });
+                          Provider.of<chDataProvider>(context, listen: false)
+                              .pPoints = {};
+                          Provider.of<chDataProvider>(context, listen: false)
+                              .polyLineDone = false;
+                          Provider.of<chDataProvider>(context, listen: false)
+                              .loading2 = false;
+                          Provider.of<chDataProvider>(context, listen: false)
+                              .stateOfCharge = null;
+                          Provider.of<chDataProvider>(context, listen: false)
+                              .vehVersion = null;
+                          Provider.of<chDataProvider>(context, listen: false)
+                              .vehModel = null;
+                          Provider.of<chDataProvider>(context, listen: false)
+                              .showReset = false;
+                        },
+                        child: const Text('Reset'),
+                      )
+                    : FloatingActionButton(
+                        onPressed: () async {
+                          await showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                  content: openFilterModal(
+                                      context,
+                                      currentLocation?.latitude,
+                                      currentLocation?.longitude)));
+                        },
+                        child: const Text('Filter'),
+                      );
+              }))
         ],
       ),
+    );
+  }
+
+  Widget loadingWidget(BuildContext context, String text) {
+    return Stack(
+      children: [
+        Container(
+            alignment: Alignment.center, child: CircularProgressIndicator()),
+        Container(alignment: Alignment.center, child: Text('$text is loading '))
+      ],
+    );
+  }
+
+  Widget openFilterModal(
+      BuildContext context, double? currentLAT, double? currentLONG) {
+    int? userInput;
+    String? selectedTitle = '';
+    String? selectedSecondTitle = '';
+
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Enter Input:',
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  onChanged: (value) {
+                    setState(() {
+                      userInput = int.parse(value);
+                    });
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter input here',
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Select Title:',
+                  style: TextStyle(fontSize: 18),
+                ),
+                Wrap(
+                  children: [
+                    // Generate chip tiles for titles
+                    ChoiceChip(
+                      label: Text('Title 1'),
+                      selected: selectedTitle == 'Title 1',
+                      onSelected: (isSelected) {
+                        setState(() {
+                          selectedTitle = isSelected ? 'Title 1' : '';
+                        });
+                      },
+                    ),
+                    ChoiceChip(
+                      label: Text('Title 2'),
+                      selected: selectedTitle == 'Title 2',
+                      onSelected: (isSelected) {
+                        setState(() {
+                          selectedTitle = isSelected ? 'Title 2' : '';
+                        });
+                      },
+                    ),
+                    // Add more chip tiles as needed
+                  ],
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Select Second Title:',
+                  style: TextStyle(fontSize: 18),
+                ),
+                Wrap(
+                  children: [
+                    // Generate chip tiles for second titles
+                    ChoiceChip(
+                      label: Text('Second Title 1'),
+                      selected: selectedSecondTitle == 'Second Title 1',
+                      onSelected: (isSelected) {
+                        setState(() {
+                          selectedSecondTitle =
+                              isSelected ? 'Second Title 1' : '';
+                        });
+                      },
+                    ),
+                    ChoiceChip(
+                      label: Text('Second Title 2'),
+                      selected: selectedSecondTitle == 'Second Title 2',
+                      onSelected: (isSelected) {
+                        setState(() {
+                          selectedSecondTitle =
+                              isSelected ? 'Second Title 2' : '';
+                        });
+                      },
+                    )
+                    // Add more chip tiles as needed
+                  ],
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    // Making it false to show the loading.....
+                    // Provider.of<chDataProvider>(context, listen: false).loading2 =
+                    //     false;
+
+                    // Do something with userInput, selectedTitle, selectedSecondTitle
+                    if (userInput != null &&
+                        selectedTitle != null &&
+                        selectedSecondTitle != null) {
+                      Navigator.pop(context);
+                      Provider.of<chDataProvider>(context, listen: false)
+                          .showReset = true;
+                      Provider.of<chDataProvider>(context, listen: false)
+                          .stateOfCharge = userInput;
+                      Provider.of<chDataProvider>(context, listen: false)
+                          .vehVersion = selectedTitle;
+                      Provider.of<chDataProvider>(context, listen: false)
+                          .vehModel = selectedSecondTitle;
+
+                      final dataProvider = context.read<
+                          chDataProvider>(); // Access provider using context
+
+                      dataProvider.loading2 = true;
+                      requestForBestCS(currentLAT, currentLONG, userInput);
+                    } else {}
+
+                    // Update loading2 within the Future
+                    // fetchData();
+
+                    // waiting for 2 seconds
+                    // await Future.delayed(const Duration(seconds: 2));
+                    // again making loading to true to show the output
+                  },
+                  child: Text('Apply'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -675,7 +885,9 @@ class _Test3State extends State<Test3> {
     // print(url2);
 
     // Just for Checking
-    String url1 = 'http://127.0.0.1:5000/api/extract_parameters';
+    // String url1 = 'http://127.0.0.1:5000/api/extract_parameters';
+    String url1 =
+        'https://server-orcin-eight.vercel.app/api/extract_parameters';
     try {
       String queryString = '';
 
@@ -688,7 +900,6 @@ class _Test3State extends State<Test3> {
 
       if (response.statusCode == 200) {
         Map<dynamic, dynamic> jsonResponse = jsonDecode(response.body);
-        print(jsonResponse);
 
         double destLat = jsonResponse['CS']['location'][0];
         double destLong = jsonResponse['CS']['location'][1];
@@ -704,13 +915,8 @@ class _Test3State extends State<Test3> {
   // Drawing polyline
   void drawPolyLine(
       double? startLat, double? startLng, double endLat, double endLng) async {
-    String URL =
-        "https://maps.googleapis.com/maps/api/directions/json?key=$googleAPiKey&units=metric&origin=$startLat,$startLng&destination=$endLat,$endLng&mode=driving";
-
-    print('THE URL IS THIS ----------------');
-    print(URL);
-
-    String url1 = 'http://127.0.0.1:5000/api/fetchPolylines';
+    // String url1 = 'http://127.0.0.1:5000/api/fetchPolylines';
+    String url1 = 'https://server-orcin-eight.vercel.app/api/fetchPolylines';
 
     try {
       String queryString = '';
@@ -741,9 +947,10 @@ class _Test3State extends State<Test3> {
               color: Colors.red));
         }
 
-        print(pPoints);
-
         setState(() {
+          Provider.of<chDataProvider>(context, listen: false).markers =
+              _markers;
+          Provider.of<chDataProvider>(context, listen: false).pPoints = pPoints;
           Provider.of<chDataProvider>(context, listen: false).polyLineDone =
               true;
         });
