@@ -50,10 +50,10 @@ class chDataProvider extends ChangeNotifier {
   Set<Marker> _markers = {};
   Set<Polyline> _pPoints = {};
   int? _stateOfCharge;
+  String? _vehBrand;
   String? _vehModel;
-  String? _vehVersion;
   bool _showReset = false;
-
+  double _range = 0;
   // Getter to access the data
   bool get loading => _loading;
   bool get loading2 => _loading2;
@@ -63,9 +63,10 @@ class chDataProvider extends ChangeNotifier {
   Set<Marker> get markers => _markers;
   Set<Polyline> get pPoints => _pPoints;
   int? get stateOfCharge => _stateOfCharge;
+  String? get vehBrand => _vehBrand;
   String? get vehModel => _vehModel;
-  String? get vehVersion => _vehVersion;
   bool get showReset => _showReset;
+  double get range => _range;
 
   int value = 1; // Initial value
 
@@ -124,13 +125,18 @@ class chDataProvider extends ChangeNotifier {
     notifyListeners(); // Notify listeners that data has changed
   }
 
-  set vehVersion(String? value) {
-    _vehVersion = value;
+  set vehBrand(String? value) {
+    _vehBrand = value;
     notifyListeners(); // Notify listeners that data has changed
   }
 
   set showReset(bool value) {
     _showReset = value;
     notifyListeners(); // Notify listeners that data has changed
+  }
+
+  set range(double value) {
+    _range = value;
+    notifyListeners();
   }
 }

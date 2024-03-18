@@ -9,3 +9,15 @@ Future<BitmapDescriptor> getCustomIcon(String assetPath) async {
   );
   return bitmapDescriptor;
 }
+
+class ElectricVehicle {
+  final String brand;
+  final String model;
+  final int range;
+
+  ElectricVehicle({
+    required this.brand,
+    required this.model,
+    required this.range,
+  });
+}

@@ -650,22 +650,33 @@ class _Test3State extends State<Test3> {
                   ? dataProvider
                           .markerLoadingComplete // Checking Either markers has been done or not
                       ? dataProvider.polyLineDone
-                          ? GoogleMap(
-                              mapType: MapType.normal,
-                              initialCameraPosition: CameraPosition(
-                                target: _initialPosition,
-                                zoom: 12.0,
-                              ),
-                              onMapCreated: (GoogleMapController controller) {
-                                _mapController = controller;
-                              },
-                              markers: Provider.of<chDataProvider>(context,
-                                      listen: false)
-                                  .markers,
-                              // setting polylines
-                              polylines: Provider.of<chDataProvider>(context,
-                                      listen: false)
-                                  .pPoints,
+                          ? Stack(
+                              children: [
+                                GoogleMap(
+                                  mapType: MapType.normal,
+                                  initialCameraPosition: CameraPosition(
+                                    target: _initialPosition,
+                                    zoom: 12.0,
+                                  ),
+                                  onMapCreated:
+                                      (GoogleMapController controller) {
+                                    _mapController = controller;
+                                  },
+                                  markers: Provider.of<chDataProvider>(context,
+                                          listen: false)
+                                      .markers,
+                                  // setting polylines
+                                  polylines: Provider.of<chDataProvider>(
+                                          context,
+                                          listen: false)
+                                      .pPoints,
+                                ),
+                                Positioned(
+                                    top: 20.0, // Adjust top padding
+                                    left: 20.0, // Adjust left padding
+                                    child: Text(
+                                        ' Your calculated range is ${dataProvider.range}')),
+                              ],
                             )
                           : loadingWidget(context, 'Polylines')
                       : loadingWidget(
@@ -707,7 +718,7 @@ class _Test3State extends State<Test3> {
                           Provider.of<chDataProvider>(context, listen: false)
                               .stateOfCharge = null;
                           Provider.of<chDataProvider>(context, listen: false)
-                              .vehVersion = null;
+                              .vehBrand = null;
                           Provider.of<chDataProvider>(context, listen: false)
                               .vehModel = null;
                           Provider.of<chDataProvider>(context, listen: false)
@@ -775,27 +786,37 @@ class _Test3State extends State<Test3> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  'Select Title:',
+                  'Select Brand :',
                   style: TextStyle(fontSize: 18),
                 ),
                 Wrap(
                   children: [
                     // Generate chip tiles for titles
                     ChoiceChip(
-                      label: Text('Title 1'),
-                      selected: selectedTitle == 'Title 1',
+                      label: Text('BMW'),
+                      selected: selectedTitle == 'BMW',
                       onSelected: (isSelected) {
                         setState(() {
-                          selectedTitle = isSelected ? 'Title 1' : '';
+                          selectedTitle = isSelected ? 'BMW' : '';
                         });
                       },
                     ),
                     ChoiceChip(
-                      label: Text('Title 2'),
-                      selected: selectedTitle == 'Title 2',
+                      label: Text('Honda'),
+                      selected: selectedTitle == 'Honda',
                       onSelected: (isSelected) {
                         setState(() {
-                          selectedTitle = isSelected ? 'Title 2' : '';
+                          selectedTitle = isSelected ? 'Honda' : '';
+                        });
+                      },
+                    ),
+
+                    ChoiceChip(
+                      label: Text('Tesla'),
+                      selected: selectedTitle == 'Tesla',
+                      onSelected: (isSelected) {
+                        setState(() {
+                          selectedTitle = isSelected ? 'Tesla' : '';
                         });
                       },
                     ),
@@ -804,29 +825,36 @@ class _Test3State extends State<Test3> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  'Select Second Title:',
+                  'Select Model:',
                   style: TextStyle(fontSize: 18),
                 ),
                 Wrap(
                   children: [
                     // Generate chip tiles for second titles
                     ChoiceChip(
-                      label: Text('Second Title 1'),
-                      selected: selectedSecondTitle == 'Second Title 1',
+                      label: Text('2018'),
+                      selected: selectedSecondTitle == '2018',
                       onSelected: (isSelected) {
                         setState(() {
-                          selectedSecondTitle =
-                              isSelected ? 'Second Title 1' : '';
+                          selectedSecondTitle = isSelected ? '2018' : '';
                         });
                       },
                     ),
                     ChoiceChip(
-                      label: Text('Second Title 2'),
-                      selected: selectedSecondTitle == 'Second Title 2',
+                      label: Text('2019'),
+                      selected: selectedSecondTitle == '2019',
                       onSelected: (isSelected) {
                         setState(() {
-                          selectedSecondTitle =
-                              isSelected ? 'Second Title 2' : '';
+                          selectedSecondTitle = isSelected ? '2019' : '';
+                        });
+                      },
+                    ),
+                    ChoiceChip(
+                      label: Text('2020'),
+                      selected: selectedSecondTitle == '2020',
+                      onSelected: (isSelected) {
+                        setState(() {
+                          selectedSecondTitle = isSelected ? '2020' : '';
                         });
                       },
                     )
@@ -850,15 +878,38 @@ class _Test3State extends State<Test3> {
                       Provider.of<chDataProvider>(context, listen: false)
                           .stateOfCharge = userInput;
                       Provider.of<chDataProvider>(context, listen: false)
-                          .vehVersion = selectedTitle;
+                          .vehBrand = selectedTitle;
                       Provider.of<chDataProvider>(context, listen: false)
                           .vehModel = selectedSecondTitle;
 
                       final dataProvider = context.read<
                           chDataProvider>(); // Access provider using context
 
+                      // Calculating the Range
+
+                      List<Map<String, dynamic>> electricVehicles = [
+                        {'brand': 'BMW', 'model': '2019', 'range': 50.0},
+                        {'brand': 'Honda', 'model': '2018', 'range': 40.0},
+                        {'brand': 'Tesla', 'model': '2020', 'range': 60.0},
+                      ];
+
+                      double totalRange = 0.0;
+
+                      for (var vehicle in electricVehicles) {
+                        // finding the Brand and get the total Range of it
+
+                        if (selectedTitle == vehicle['brand']) {
+                          totalRange = vehicle['range'];
+                        }
+                      }
+
+                      double calculate_Range = userInput! / 100 * totalRange;
+
+                      dataProvider.range = calculate_Range;
+
                       dataProvider.loading2 = true;
-                      requestForBestCS(currentLAT, currentLONG, userInput);
+                      requestForBestCS(currentLAT, currentLONG, userInput,
+                          selectedTitle, selectedSecondTitle);
                     } else {}
 
                     // Update loading2 within the Future
@@ -879,7 +930,8 @@ class _Test3State extends State<Test3> {
   }
 
   //  Sending Request to the server for best CS
-  void requestForBestCS(double? clat, double? clong, cSOC) async {
+  void requestForBestCS(double? clat, double? clong, cSOC, String? vehBrand,
+      String? vehModel) async {
     // This is Final one
     // String url2 = 'https://server-orcin-eight.vercel.app/api/extract_parameters';
     // print(url2);
@@ -892,7 +944,7 @@ class _Test3State extends State<Test3> {
       String queryString = '';
 
       queryString +=
-          'currentLAT=${Uri.encodeComponent(clat.toString())}&currentLONG=${Uri.encodeComponent(clong.toString())}&currentSOC=${Uri.encodeComponent(cSOC.toString())}';
+          'currentLAT=${Uri.encodeComponent(clat.toString())}&currentLONG=${Uri.encodeComponent(clong.toString())}&currentSOC=${Uri.encodeComponent(cSOC.toString())}&vehBrand=${Uri.encodeComponent(vehBrand!)}&vehModel=${Uri.encodeComponent(vehModel!)}';
 
       var requestUrl2 = url1 + '?' + queryString;
 
