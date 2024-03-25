@@ -1,15 +1,10 @@
-import 'package:effecient/Screens/profile.dart';
+// ignore_for_file: file_names, library_private_types_in_public_api, unused_element
+
 import 'package:flutter/material.dart';
 import 'package:effecient/navBar/colors/colors.dart';
-import 'package:effecient/navBar/paint.dart';
 import 'package:effecient/navBar/font.dart';
 import 'package:effecient/navBar/navBar.dart';
-import 'package:effecient/Screens/Extra_Screens/bookmarks.dart';
-import 'package:effecient/Screens/Extra_Screens/notification.dart';
-import 'package:effecient/Screens/Extra_Screens/route.dart';
 import 'package:effecient/tab_contents.dart';
-import 'package:effecient/Auth/loginPage.dart';
-import 'package:effecient/Auth/SignupPage.dart';
 
 //import 'package:effecient/Auth/loginPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -170,19 +165,19 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-class NextScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Next Screen'),
-      ),
-      body: Center(
-        child: Text('This is the next screen!'),
-      ),
-    );
-  }
-}
+// class NextScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Next Screen'),
+//       ),
+//       body: Center(
+//         child: Text('This is the next screen!'),
+//       ),
+//     );
+//   }
+// }
 
 class TabContent extends StatelessWidget {
   final String title;

@@ -1,10 +1,12 @@
 import 'package:effecient/Auth/loginPage.dart';
+import 'package:effecient/Providers/chData.dart';
 import 'package:effecient/WelcomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:effecient/Auth/SignupPage.dart';
 import 'package:effecient/Auth/HomePage.dart';
+import 'package:provider/provider.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -154,6 +156,10 @@ class _SignupPageState extends State<SignupPage> {
 
       // Send email verification
       await userCredential.user!.sendEmailVerification();
+
+      // Setting the flag that initial screens has been seen
+      Provider.of<chDataProvider>(context, listen: false)
+          .initialLoadingComplete = true;
 
       // Navigate to another page after successful registration
       // You can replace 'MyTabScreen' with the name of the screen you want to navigate to

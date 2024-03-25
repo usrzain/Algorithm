@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field, prefer_final_fields, library_private_types_in_public_api
+// ignore_for_file: unused_field, prefer_final_fields, library_private_types_in_public_api, unused_import, unnecessary_import
 
 import 'dart:async';
 import 'dart:convert';
@@ -186,7 +186,7 @@ class _Test3State extends State<Test3> {
 
   // Send Function
 
-  // send Func
+  // Send Func
   sendFun(double? clat, double? clong, double dlat, double dlong) async {
     // This is Final one
     String url2 = 'https://server-orcin-eight.vercel.app/api/distanceandtime';
@@ -741,16 +741,6 @@ class _Test3State extends State<Test3> {
               }))
         ],
       ),
-    );
-  }
-
-  Widget loadingWidget(BuildContext context, String text) {
-    return Stack(
-      children: [
-        Container(
-            alignment: Alignment.center, child: CircularProgressIndicator()),
-        Container(alignment: Alignment.center, child: Text('$text is loading '))
-      ],
     );
   }
 

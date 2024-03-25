@@ -41,6 +41,8 @@ dependencies:
   random_uuid_string: ^0.0.2
   permission_handler: ^11.3.0
   maps_launcher: ^2.2.1
+  shared_preferences: ^2.2.2
+  smooth_page_indicator: ^1.1.0
 
 dev_dependencies:
   flutter_test:

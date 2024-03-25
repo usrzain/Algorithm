@@ -54,6 +54,9 @@ class chDataProvider extends ChangeNotifier {
   String? _vehModel;
   bool _showReset = false;
   double _range = 0;
+  bool _hasSeenTheIntro = false;
+  bool _initialLoadingComplete = false;
+
   // Getter to access the data
   bool get loading => _loading;
   bool get loading2 => _loading2;
@@ -67,6 +70,8 @@ class chDataProvider extends ChangeNotifier {
   String? get vehModel => _vehModel;
   bool get showReset => _showReset;
   double get range => _range;
+  bool get hasSeenTheIntro => _hasSeenTheIntro;
+  bool get initialLoadingComplete => _initialLoadingComplete;
 
   int value = 1; // Initial value
 
@@ -137,6 +142,16 @@ class chDataProvider extends ChangeNotifier {
 
   set range(double value) {
     _range = value;
+    notifyListeners();
+  }
+
+  set hasSeenTheIntro(bool value) {
+    _hasSeenTheIntro = value;
+    notifyListeners();
+  }
+
+  set initialLoadingComplete(bool value) {
+    _initialLoadingComplete = value;
     notifyListeners();
   }
 }

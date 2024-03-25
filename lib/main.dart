@@ -1,26 +1,18 @@
+// ignore_for_file: file_names, library_private_types_in_public_api, unused_element
+
 import 'package:effecient/Auth/HomePage.dart';
 import 'package:effecient/Auth/loginPage.dart';
-import 'package:effecient/Data.dart';
+import 'package:effecient/Auth/nextScreen.dart';
 import 'package:effecient/Providers/chData.dart';
-import 'package:effecient/Providers/loading.dart';
+import 'package:effecient/Screens/CS_info_Screen/extraFun.dart';
+import 'package:effecient/Screens/Intro/intro_screen.dart';
 
-import 'package:effecient/Screens/Extra_Screens/tabCheck.dart';
-import 'package:effecient/WelcomePage.dart';
-import 'package:effecient/tab_contents.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
-
-import 'package:effecient/Screens/CarSelection/carSelection.dart';
-
-import 'package:effecient/Screens/CarSelection/carSelect.dart';
-import 'package:effecient/Screens/Extra_Screens/intro1.dart';
-
-import 'package:effecient/Screens/Intro/intro_screen.dart';
-
-import 'package:effecient/Screens/PortSelection/EvPortSelectionScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,10 +50,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   User? loggedInUser;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  bool _hasSeenIntroSignupKey = false;
 
   @override
   void initState() {
     super.initState();
+    checkFirstTime();
     loggedInUser = FirebaseAuth.instance.currentUser;
     if (loggedInUser != null) {
       print('logged in');
@@ -73,15 +68,49 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-        useMaterial3: true,
-      ),
-      home: loggedInUser != null
-          ? HomePage(user: loggedInUser)
-          : widget.initialScreen,
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+          useMaterial3: true,
+        ),
+        home: Stack(
+          children: [
+            Consumer<chDataProvider>(builder: (context, dataProvider, child) {
+              return dataProvider.initialLoadingComplete
+                  ? dataProvider.hasSeenTheIntro
+                      ? loggedInUser != null
+                          ? HomePage(user: loggedInUser)
+                          : widget.initialScreen
+                      : const IntroScreen()
+                  : loadingWidget(context, "Initial Screen");
+            })
+          ],
+        )
+
+        // loggedInUser != null
+        //     ? HomePage(user: loggedInUser)
+        //     : widget.initialScreen,
+        );
+  }
+
+  Future<void> checkFirstTime() async {
+    final SharedPreferences prefs = await _prefs;
+    print('I am watching the Intro thing ');
+    if (prefs.get('_hasSeenIntroSignupKey') != null) {
+      // It shows that user has seen the Intro
+      _hasSeenIntroSignupKey = true;
+      Provider.of<chDataProvider>(context, listen: false).hasSeenTheIntro =
+          true;
+      Provider.of<chDataProvider>(context, listen: false)
+          .initialLoadingComplete = true;
+    } else {
+      _hasSeenIntroSignupKey = false;
+      Provider.of<chDataProvider>(context, listen: false).hasSeenTheIntro =
+          false;
+      Provider.of<chDataProvider>(context, listen: false)
+          .initialLoadingComplete = true;
+      // prefs.setBool('_hasSeenIntroSignupKey', false);
+    }
   }
 }

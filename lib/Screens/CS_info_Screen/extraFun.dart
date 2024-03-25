@@ -21,3 +21,13 @@ class ElectricVehicle {
     required this.range,
   });
 }
+
+Widget loadingWidget(BuildContext context, String text) {
+  return Stack(
+    children: [
+      Container(
+          alignment: Alignment.center, child: CircularProgressIndicator()),
+      Container(alignment: Alignment.center, child: Text('$text is loading '))
+    ],
+  );
+}
